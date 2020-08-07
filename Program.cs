@@ -85,8 +85,8 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("开始执行预定初始任务");
                 Console.WriteLine("==================");
                 //接受消息开始
-                botClient.StartReceiving();
                 botClient.OnMessage += BotClient_OnMessage;
+                botClient.StartReceiving();
                 Console.WriteLine("\n\n\n应用结束处理消息,按任意键退出\n");
                 Console.ReadKey();
                 botClient.StopReceiving();
