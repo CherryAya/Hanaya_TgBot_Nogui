@@ -16,7 +16,6 @@ namespace Hanaya_TgBot_Nogui
 {
     public class Program
     {
-        static ITelegramBotClient botClient;
         static async Task Main(string[] args)
         {
             try
@@ -24,12 +23,18 @@ namespace Hanaya_TgBot_Nogui
                 //Tips
                 Console.WriteLine("================");
                 Console.WriteLine("如果是国内用户，请确保代理有被启用并有效");
+                Console.WriteLine("请保证登录阶段网络延迟在可接受范围内");
+                Console.WriteLine("否则程序有闪退可能.遇到Bug请去发issue");
                 Console.WriteLine("GitHub:https://github.com/Tgbotdev/Hanaya_TgBot_Nogui");
                 Console.WriteLine("================");
 
                 //Token输入
                 Console.Write("Token:");
                 string token = Console.ReadLine();
+
+                //Token储存
+                string tokenPath = Directory.GetCurrentDirectory() + "\\tokenSave.txt";
+                File.WriteAllText(tokenPath,token);
 
                 //该方法弃用
                 ////传参至botLogin,返回loginResult,并输出
@@ -84,10 +89,11 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("Congratulations! 登入成功");
                 Console.WriteLine("开始执行预定初始任务");
                 Console.WriteLine("==================");
+
                 //接受消息开始
                 botClient.OnMessage += BotClient_OnMessage;
                 botClient.StartReceiving();
-                Console.WriteLine("\n\n\n应用结束处理消息,按任意键退出\n");
+                Console.WriteLine("消息处理开始,按任意键终止\n");
                 Console.ReadKey();
                 botClient.StopReceiving();
             }
@@ -97,22 +103,40 @@ namespace Hanaya_TgBot_Nogui
             }
             finally
             {
+                //删除储存的token
+                File.Delete(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
+                //结束
                 Console.WriteLine("按任意键退出\n");
                 Console.ReadKey();
             }
         }
 
-        static async void BotClient_OnMessage(object sender, MessageEventArgs e)
+       //不直接提供token
+       //static ITelegramBotClient botClient;
+       //异步直接tm飞向finally***
+       //采用同步，否则直接finally
+       //这边骂一句example,nmd纯属误导人
+       //采用异步请再118的static后加上async,135头部加上await
+        static void BotClient_OnMessage(object sender, MessageEventArgs e)
         {
             try
             {
+                //建立Bot客户端
+                //写到这才想起json没储存token...
+                //var botInfo = File.ReadAllText(Directory.GetCurrentDirectory() + "\\botInfo.json");
+                //var Json = JsonConvert.DeserializeObject<dynamic>(botInfo);
+                string token = File.ReadAllText(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
+                TelegramBotClient botClient = new TelegramBotClient(token);
+
                 //判断消息不为空
                 if (e.Message.Text != null)
                 {
                     //控制台输出
-                    Console.WriteLine($"[Info]: 来自{e.Message.Chat.Id},消息:{e.Message.Text}.");
+                    Console.WriteLine($"[信息]: 来自{e.Message.Chat.Id},消息:{e.Message.Text}.");
+                    Console.WriteLine($"[处理]: 对消息来源{e.Message.Chat.Id}发送消息: 你发送了{e.Message.Text}.");
+                   
                     //消息发送
-                    await botClient.SendTextMessageAsync(
+                    botClient.SendTextMessageAsync(
                         chatId: e.Message.Chat,
                         text: "你发送了:\n" + e.Message.Text
                         );
