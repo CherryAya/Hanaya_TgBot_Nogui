@@ -10,12 +10,14 @@ using System.Net;
 using System.IO;
 using Native.Tool.IniConfig.Linq;
 using Newtonsoft.Json.Linq;
+using Telegram.Bot.Args;
 
 namespace Hanaya_TgBot_Nogui
 {
     public class Program
     {
-         static async Task Main(string[] args)
+        static ITelegramBotClient botClient;
+        static async Task Main(string[] args)
         {
             try
             {
@@ -76,10 +78,22 @@ namespace Hanaya_TgBot_Nogui
                 //ini.Object["BotAccount"]["Name"] = bot_info.Result.FirstName;
                 //ini.Save();
 
+                //Tips
+                Console.Clear();
+                Console.WriteLine("==================");
+                Console.WriteLine("Congratulations! 登入成功");
+                Console.WriteLine("开始执行预定初始任务");
+                Console.WriteLine("==================");
+                //接受消息开始
+                botClient.StartReceiving();
+                botClient.OnMessage += BotClient_OnMessage;
+                Console.WriteLine("\n\n\n应用结束处理消息,按任意键退出\n");
+                Console.ReadKey();
+                botClient.StopReceiving();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("\n------------------------\n" + ex.Message + "\n------------------------\n");
+                Console.WriteLine("\n------------------------\n" + ex.ToString() + "\n------------------------\n");
             }
             finally
             {
@@ -88,5 +102,25 @@ namespace Hanaya_TgBot_Nogui
             }
         }
 
+        static async void BotClient_OnMessage(object sender, MessageEventArgs e)
+        {
+            try
+            {
+                //判断消息不为空
+                if (e.Message.Text != null)
+                {
+                    //控制台输出
+                    Console.WriteLine($"[Info]: 来自{e.Message.Chat.Id},消息:{e.Message.Text}.");
+                    //消息发送
+                    await botClient.SendTextMessageAsync(
+                        chatId: e.Message.Chat,
+                        text: "你发送了:\n" + e.Message.Text
+                        );
+                }
+            }catch(Exception ex)
+            {
+                Console.WriteLine("\n------------------------\n" + ex.ToString() + "\n------------------------\n");
+            }
+        }
     }
 }
