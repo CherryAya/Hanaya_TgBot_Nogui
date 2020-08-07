@@ -9,38 +9,53 @@ using Newtonsoft.Json;
 using System.Net;
 using System.IO;
 using Native.Tool.IniConfig.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Hanaya_TgBot_Nogui
 {
     public class Program
     {
-        static void Main(string[] args)
+         static async Task Main(string[] args)
         {
             try
             {
                 //Tips
+                Console.WriteLine("================");
                 Console.WriteLine("如果是国内用户，请确保代理有被启用并有效");
+                Console.WriteLine("GitHub:https://github.com/Tgbotdev/Hanaya_TgBot_Nogui");
+                Console.WriteLine("================");
+
                 //Token输入
                 Console.Write("Token:");
                 string token = Console.ReadLine();
+
+                //该方法弃用
                 ////传参至botLogin,返回loginResult,并输出
                 //botLogin login = new botLogin();
                 //string resultLoginStr = login.BotLogin(token);
                 //Console.WriteLine(resultLoginStr);
+
                 //SSL/TLS连接
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11;
+
                 //建立Bot客户端
                 var botClient = new TelegramBotClient(token);
+
                 //获取Bot资料
-                var bot_info = botClient.GetMeAsync();
+                var bot_info = await botClient.GetMeAsync();
+                var Json = JsonConvert.SerializeObject(bot_info);
                 Console.WriteLine($"=====================\n" +
                     $"Well done.Login success." +
-                    $"\nAccount:{bot_info.Result.Id}\n" +
-                    $"Name:{bot_info.Result.FirstName}" +
+                    $"\nAccount:{bot_info.Id}\n" +
+                    $"Name:{bot_info.FirstName}" +
                     $"\n=====================\n");
-                
-                //写入Config,废弃，改用Json
+
+                //写入botInfo.json
+                string path = Directory.GetCurrentDirectory() + "\\botInfo.json";
+                await Task.Run(() => File.WriteAllText(path, Json));
+
+                //写入Config,废弃,改用Json,见上
                 //string path = Directory.GetCurrentDirectory() + "\\botInfo.ini";
                 //FileStream fs = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite);
                 //if (!File.Exists(path))
@@ -72,5 +87,6 @@ namespace Hanaya_TgBot_Nogui
                 Console.ReadKey();
             }
         }
+
     }
 }
