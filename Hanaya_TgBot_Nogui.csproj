@@ -67,9 +67,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InfoGet.fromBiliBili\BiliBili_HttpGet_AV.cs" />
+    <Compile Include="InfoGet.fromBiliBili\BiliBili_HttpGet_BV.cs" />
+    <Compile Include="InfoGet.fromBiliBili\Copyright_Judge.cs" />
     <Compile Include="Disuse\[disuse]botLogin.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="InfoGet.fromBiliBili\Pubdate_Convert.cs" />
+    <Compile Include="InfoGet.fromBiliBili\Tid_Judge.cs" />
+    <Compile Include="tokenProtect\Decryption.cs" />
+    <Compile Include="tokenProtect\Encryption.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
