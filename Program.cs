@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Native.Tool.IniConfig;
+//using Native.Tool.IniConfig;
 using Newtonsoft.Json;
 using System.Net;
 using System.IO;
@@ -26,28 +26,41 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("获取更新或支持请前往Github");
                 Console.WriteLine("如果是国内用户，请确保代理有被启用并有效");
                 Console.WriteLine("请保证登录阶段网络延迟在可接受范围内");
-                Console.WriteLine("否则程序有闪退可能.遇到Bug请去发issue");
+                Console.WriteLine("否则程序有闪退可能.");
                 Console.WriteLine("GitHub:https://github.com/Tgbotdev/Hanaya_TgBot_Nogui");
                 Console.WriteLine("================");
 
-                //初始化检测:Initialization 使用Json ini弃用
-                string firstpath = Directory.GetCurrentDirectory() + "\\firstCheck.ini";
-                if (!File.Exists(firstpath))
-                {
-                    Console.WriteLine("[信息]应用开始初始化");
-                    File.Create(firstpath);
-                    File.Create(Directory.GetCurrentDirectory() + "\\config.ini");
-
-                    Console.WriteLine("[信息]完成初始化,请重启应用");
-                    Console.WriteLine("按任意键退出");
-                    Console.ReadKey();
-                    Environment.Exit(0);
-                    //IniConfig ini = new IniConfig(Directory.GetCurrentDirectory() + "\\config.ini");
-                    //ini.Load();
-                    //ini.Object.Add(new ISection("function"));
-                    //ini.Object["function"]["use"] = "0";
-                    //ini.Save();
-                }
+                //废弃初始化
+                ////初始化检测:Initialization 直接储存json 弃用ini
+                //string TgBotJsonPath = Directory.GetCurrentDirectory() + "\\config\\TgBot.json";
+                //if (!File.Exists(TgBotJsonPath))
+                //{
+                //    Console.WriteLine("[信息]应用开始初始化");
+                //    File.Create(TgBotJsonPath);
+                //    var TgBotJson = "[{\"Initialization\":\"Initialized\",\"function\":\"0\"}]";
+                //    File.WriteAllText(TgBotJsonPath, TgBotJson);
+                //    Console.WriteLine("[信息]完成初始化,请重启应用");
+                //    Console.WriteLine("按任意键退出");
+                //    Console.ReadKey();
+                //    Environment.Exit(0);
+                //    //IniConfig ini = new IniConfig(Directory.GetCurrentDirectory() + "\\config.ini");
+                //    //ini.Load();
+                //    //ini.Object.Add(new ISection("function"));
+                //    //ini.Object["function"]["use"] = "0";
+                //    //ini.Save();
+                //}
+                //var InitializationJson = File.ReadAllText(TgBotJsonPath);
+                //var Initialized = JsonConvert.DeserializeObject<dynamic>(InitializationJson);
+                //if (!Initialized.Initialization == "Initialized")
+                //{
+                //    Console.WriteLine("[信息]检测到需要初始化(配置项不为Initialized)");
+                //    var TgBotJson = "[{\"Initialization\":\"Initialized\",\"function\":\"0\"}]";
+                //    File.WriteAllText(TgBotJsonPath,TgBotJson);
+                //    Console.WriteLine("[信息]完成初始化,请重启应用");
+                //    Console.WriteLine("按任意键退出");
+                //    Console.ReadKey();
+                //    Environment.Exit(0);
+                //}
 
                 //Token输入
                 Console.Write("Token:");
@@ -98,7 +111,7 @@ namespace Hanaya_TgBot_Nogui
                 string path = Directory.GetCurrentDirectory() + "\\botInfo.json";
                 await Task.Run(() => File.WriteAllText(path, Json));
                 Console.WriteLine("[信息]Bot信息已被储存到本地");
-
+                
                 //写入Config,废弃,改用Json,见上
                 //string path = Directory.GetCurrentDirectory() + "\\botInfo.ini";
                 //FileStream fs = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite);
@@ -127,9 +140,12 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("开始接收消息并根据配置文件处理消息");
                 Console.WriteLine("==================");
 
+                //取消检测 改用输入
                 //检查功能启用 使用ini储存
-                string configPath = Directory.GetCurrentDirectory() + "\\config.ini";
-                IniConfig iniConfig = new IniConfig(configPath);
+                //string configPath = Directory.GetCurrentDirectory() + "\\config\\TgBot.json";
+                //var funcjson = File.ReadAllText(configPath);
+                //var func = JsonConvert.DeserializeObject<dynamic>(funcjson);
+                //IniConfig iniConfig = new IniConfig(configPath);
                 //if (!File.Exists(configPath))
                 //{
                 //    File.Create(configPath);
@@ -139,10 +155,15 @@ namespace Hanaya_TgBot_Nogui
                 //    iniConfig.Save();
                 //    Console.WriteLine("[信息]配置文件丢失,重新创建文件,默认功能为'0'");
                 //}
-                iniConfig.Load();
-                if (iniConfig.Object["function"]["use"] == "0")
+                //iniConfig.Load();
+                Console.WriteLine("[信息]请选择启用的功能");
+                Console.WriteLine("[信息]1 复读机");
+                Console.WriteLine("[信息]2 BiliBili信息获取");
+                Console.Write(">");
+                string func = Console.ReadLine();
+                if (func == "1")
                 {
-                    iniConfig.Save();
+                    //iniConfig.Save();
                     Console.WriteLine("[信息]载入0号功能:复读机");
                     //复读机
                     //接受消息开始
@@ -152,9 +173,9 @@ namespace Hanaya_TgBot_Nogui
                     Console.ReadKey();
                     botClient.StopReceiving();
                 }
-                else if (iniConfig.Object["function"]["use"] == "1")
+                else if (func == "2")
                 {
-                    iniConfig.Save();
+                    //iniConfig.Save();
                     Console.WriteLine("[信息]载入1号功能:BiliBIli信息获取");
                     //BiliBili信息获取
                     //接受消息开始
@@ -166,7 +187,7 @@ namespace Hanaya_TgBot_Nogui
                 }
                 else
                 {
-                    iniConfig.Save();
+                    //iniConfig.Save();
                     Console.WriteLine("没有找到配置文件值相对应功能，应用退出");
                 }
             }
@@ -176,8 +197,12 @@ namespace Hanaya_TgBot_Nogui
             }
             finally
             {
-                //删除储存的token
-                File.Delete(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
+                //检测储存的token
+                if (File.Exists(Directory.GetCurrentDirectory() + "\\config\\tokenSave.txt"))
+                {
+                    //删除储存的token
+                    File.Delete(Directory.GetCurrentDirectory() + "\\config\\tokenSave.txt");
+                }
                 //结束
                 Console.WriteLine("按任意键退出\n");
                 Console.ReadKey();
@@ -248,7 +273,5 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("\n------------------------\n" + ex.ToString() + "\n------------------------\n");
             }
         }
-
-
     }
 }
