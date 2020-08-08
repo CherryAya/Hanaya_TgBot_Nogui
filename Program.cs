@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Native.Tool.IniConfig;
+//using Native.Tool.IniConfig;
 using Newtonsoft.Json;
 using System.Net;
 using System.IO;
 using Native.Tool.IniConfig.Linq;
 using Newtonsoft.Json.Linq;
 using Telegram.Bot.Args;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types;
 
 namespace Hanaya_TgBot_Nogui
 {
@@ -26,28 +28,41 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("获取更新或支持请前往Github");
                 Console.WriteLine("如果是国内用户，请确保代理有被启用并有效");
                 Console.WriteLine("请保证登录阶段网络延迟在可接受范围内");
-                Console.WriteLine("否则程序有闪退可能.遇到Bug请去发issue");
+                Console.WriteLine("否则程序有闪退可能.");
                 Console.WriteLine("GitHub:https://github.com/Tgbotdev/Hanaya_TgBot_Nogui");
                 Console.WriteLine("================");
 
-                //初始化检测:Initialization 使用Json ini弃用
-                string firstpath = Directory.GetCurrentDirectory() + "\\firstCheck.ini";
-                if (!File.Exists(firstpath))
-                {
-                    Console.WriteLine("[信息]应用开始初始化");
-                    File.Create(firstpath);
-                    File.Create(Directory.GetCurrentDirectory() + "\\config.ini");
-
-                    Console.WriteLine("[信息]完成初始化,请重启应用");
-                    Console.WriteLine("按任意键退出");
-                    Console.ReadKey();
-                    Environment.Exit(0);
-                    //IniConfig ini = new IniConfig(Directory.GetCurrentDirectory() + "\\config.ini");
-                    //ini.Load();
-                    //ini.Object.Add(new ISection("function"));
-                    //ini.Object["function"]["use"] = "0";
-                    //ini.Save();
-                }
+                //废弃初始化
+                ////初始化检测:Initialization 直接储存json 弃用ini
+                //string TgBotJsonPath = Directory.GetCurrentDirectory() + "\\config\\TgBot.json";
+                //if (!File.Exists(TgBotJsonPath))
+                //{
+                //    Console.WriteLine("[信息]应用开始初始化");
+                //    File.Create(TgBotJsonPath);
+                //    var TgBotJson = "[{\"Initialization\":\"Initialized\",\"function\":\"0\"}]";
+                //    File.WriteAllText(TgBotJsonPath, TgBotJson);
+                //    Console.WriteLine("[信息]完成初始化,请重启应用");
+                //    Console.WriteLine("按任意键退出");
+                //    Console.ReadKey();
+                //    Environment.Exit(0);
+                //    //IniConfig ini = new IniConfig(Directory.GetCurrentDirectory() + "\\config.ini");
+                //    //ini.Load();
+                //    //ini.Object.Add(new ISection("function"));
+                //    //ini.Object["function"]["use"] = "0";
+                //    //ini.Save();
+                //}
+                //var InitializationJson = File.ReadAllText(TgBotJsonPath);
+                //var Initialized = JsonConvert.DeserializeObject<dynamic>(InitializationJson);
+                //if (!Initialized.Initialization == "Initialized")
+                //{
+                //    Console.WriteLine("[信息]检测到需要初始化(配置项不为Initialized)");
+                //    var TgBotJson = "[{\"Initialization\":\"Initialized\",\"function\":\"0\"}]";
+                //    File.WriteAllText(TgBotJsonPath,TgBotJson);
+                //    Console.WriteLine("[信息]完成初始化,请重启应用");
+                //    Console.WriteLine("按任意键退出");
+                //    Console.ReadKey();
+                //    Environment.Exit(0);
+                //}
 
                 //Token输入
                 Console.Write("Token:");
@@ -65,7 +80,7 @@ namespace Hanaya_TgBot_Nogui
                 else
                 {
                     Console.WriteLine("[信息]token加密成功,已写入本地");
-                    File.WriteAllText(tokenPath, EncryptionText);
+                    System.IO.File.WriteAllText(tokenPath, EncryptionText);
                 }
 
 
@@ -96,9 +111,9 @@ namespace Hanaya_TgBot_Nogui
 
                 //写入botInfo.json
                 string path = Directory.GetCurrentDirectory() + "\\botInfo.json";
-                await Task.Run(() => File.WriteAllText(path, Json));
+                await Task.Run(() => System.IO.File.WriteAllText(path, Json));
                 Console.WriteLine("[信息]Bot信息已被储存到本地");
-
+                
                 //写入Config,废弃,改用Json,见上
                 //string path = Directory.GetCurrentDirectory() + "\\botInfo.ini";
                 //FileStream fs = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite);
@@ -124,12 +139,15 @@ namespace Hanaya_TgBot_Nogui
                 Console.Clear();
                 Console.WriteLine("==================");
                 Console.WriteLine("Congratulations! 登入成功");
-                Console.WriteLine("开始接收消息并根据配置文件处理消息");
+                Console.WriteLine("开始接收消息并根据所选择功能处理消息");
                 Console.WriteLine("==================");
 
+                //取消检测 改用输入
                 //检查功能启用 使用ini储存
-                string configPath = Directory.GetCurrentDirectory() + "\\config.ini";
-                IniConfig iniConfig = new IniConfig(configPath);
+                //string configPath = Directory.GetCurrentDirectory() + "\\config\\TgBot.json";
+                //var funcjson = File.ReadAllText(configPath);
+                //var func = JsonConvert.DeserializeObject<dynamic>(funcjson);
+                //IniConfig iniConfig = new IniConfig(configPath);
                 //if (!File.Exists(configPath))
                 //{
                 //    File.Create(configPath);
@@ -139,34 +157,40 @@ namespace Hanaya_TgBot_Nogui
                 //    iniConfig.Save();
                 //    Console.WriteLine("[信息]配置文件丢失,重新创建文件,默认功能为'0'");
                 //}
-                iniConfig.Load();
-                if (iniConfig.Object["function"]["use"] == "0")
+                //iniConfig.Load();
+                Console.WriteLine("[信息]请选择启用的功能");
+                Console.WriteLine("[信息]1 复读机");
+                Console.WriteLine("[信息]2 BiliBili信息获取");
+                Console.Write(">");
+                string func = Console.ReadLine();
+                if (func == "1")
                 {
-                    iniConfig.Save();
-                    Console.WriteLine("[信息]载入0号功能:复读机");
+                    //iniConfig.Save();
+                    Console.WriteLine("[信息]载入1号功能:复读机");
                     //复读机
                     //接受消息开始
                     botClient.OnMessage += BotClient_Respeak;
                     botClient.StartReceiving();
-                    Console.WriteLine("消息处理开始,按任意键终止\n");
+                    Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
                     Console.ReadKey();
                     botClient.StopReceiving();
                 }
-                else if (iniConfig.Object["function"]["use"] == "1")
+                else if (func == "2")
                 {
-                    iniConfig.Save();
-                    Console.WriteLine("[信息]载入1号功能:BiliBIli信息获取");
+                    //iniConfig.Save();
+                    Console.WriteLine("[信息]载入2号功能:BiliBIli信息获取");
                     //BiliBili信息获取
                     //接受消息开始
                     botClient.OnMessage += BotClient_InfoGet_bili;
                     botClient.StartReceiving();
-                    Console.WriteLine("消息处理开始,按任意键终止\n");
+                    Console.WriteLine("[处理]: 对消息来源一律处理 -> BiliBili_InfoGet. (不匹配消息会被忽略)");
+                    Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
                     Console.ReadKey();
                     botClient.StopReceiving();
                 }
                 else
                 {
-                    iniConfig.Save();
+                    //iniConfig.Save();
                     Console.WriteLine("没有找到配置文件值相对应功能，应用退出");
                 }
             }
@@ -176,10 +200,14 @@ namespace Hanaya_TgBot_Nogui
             }
             finally
             {
-                //删除储存的token
-                File.Delete(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
+                //检测储存的token
+                if (System.IO.File.Exists(Directory.GetCurrentDirectory() + "\\tokenSave.txt"))
+                {
+                    //删除储存的token
+                    System.IO.File.Delete(Directory.GetCurrentDirectory() + "\\tokenSave.txt");
+                }
                 //结束
-                Console.WriteLine("按任意键退出\n");
+                Console.WriteLine("\n按任意键退出\n");
                 Console.ReadKey();
             }
         }
@@ -199,7 +227,7 @@ namespace Hanaya_TgBot_Nogui
                 //写到这才想起json没储存token...
                 //var botInfo = File.ReadAllText(Directory.GetCurrentDirectory() + "\\botInfo.json");
                 //var Json = JsonConvert.DeserializeObject<dynamic>(botInfo);
-                string token = File.ReadAllText(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
+                string token = System.IO.File.ReadAllText(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
                 tokenProtect.Decryption decryption = new tokenProtect.Decryption();
                 string DecryptionText = decryption.Decrypt(token); //解密
                 if (DecryptionText == "Error")
@@ -218,8 +246,8 @@ namespace Hanaya_TgBot_Nogui
                    
                     //消息发送
                     botClient.SendTextMessageAsync(
-                        chatId: e.Message.Chat,
-                        text: "你发送了:\n" + e.Message.Text
+                         e.Message.Chat,
+                         "你发送了:\n" + e.Message.Text
                         );
                 }
             }catch(Exception ex)
@@ -232,23 +260,291 @@ namespace Hanaya_TgBot_Nogui
         {
             try
             {
-                //Json
+                //Json -> 变量
                 string Json, av, datetime, tidstr, copyrightstr;
                 string bvid, aid, title, pic, videos, tid, tname, copyright, pubdate, desc, duration;//data.
                 string mid, name, face;//data.owner.
                 string view, danmaku, reply, favorite, coin, share, like;//data.stat.
-                int[] pages;//data.pages.
-                string cid, page, part, duration_page;//if_data.pages=Int[],data.pages.[0/1/2]
-                int[] staff;//data.staff.
-                string mid_staff, title_staff, name_staff, face_staff, official, follower;//if_data.staff=Int[],data.staff.[0/1/2]
-                //开发中
+
+                //建立Bot客户端
+                string token = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + "\\tokenSave.txt");
+                tokenProtect.Decryption decryption = new tokenProtect.Decryption();
+                string DecryptionText = decryption.Decrypt(token); //解密
+                if (DecryptionText == "Error")
+                {
+                    Console.WriteLine("[错误]token解密未成功,将导致空指针异常,本次信息可能返回控制台但不被处理");
+                    DecryptionText = null;
+                }
+                TelegramBotClient botClient = new TelegramBotClient(DecryptionText);
+
+                //判断消息不为空
+                if (e.Message.Text != null)
+                {
+                    //控制台输出
+                    Console.WriteLine($"[信息]: 来自{e.Message.Chat.Id},消息:{e.Message.Text}.");
+
+                    string Msg = e.Message.Text;
+                    if (Msg.Length >= 2)
+                    {
+                        if (Msg.Substring(0, 2) == "av")
+                        {
+                            //HttpGet_Json
+                            BiliBili_HttpGet_AV _HttpGet = new BiliBili_HttpGet_AV();
+                            Json = _HttpGet.HttpGet(aid = Msg.Substring(2, Msg.Length - 2));
+                            var _Jsonobj = JsonConvert.DeserializeObject<dynamic>(Json);
+                            if (_Jsonobj.code == 0)
+                            {
+                                //Json -> 变量
+                                //data.
+                                pic = _Jsonobj.data.pic;
+                                bvid = _Jsonobj.data.bvid;  //bv号
+                                av = "av" + _Jsonobj.data.aid; //av号
+                                title = _Jsonobj.data.title;  //标题
+                                videos = _Jsonobj.data.videos;  //分P数量
+                                tid = _Jsonobj.data.tid;  //主分区
+                                tname = _Jsonobj.data.tname;  //子分区
+                                copyright = _Jsonobj.data.copyright;  //版权信息
+                                pubdate = _Jsonobj.data.pubdate;  //投稿时间(时间戳
+                                desc = _Jsonobj.data.desc;  //简介
+                                duration = _Jsonobj.data.duration;  //视频持续时长(所有分P
+                                //data.owner.
+                                mid = _Jsonobj.data.owner.mid;  //up主UID
+                                name = _Jsonobj.data.owner.name;  //up主昵称
+                                face = _Jsonobj.data.owner.face;  //up主头像地址
+                                //data.stat.
+                                view = _Jsonobj.data.stat.view;  //观看数量
+                                danmaku = _Jsonobj.data.stat.danmaku;  //弹幕数量
+                                reply = _Jsonobj.data.stat.reply;  //评论数量
+                                favorite = _Jsonobj.data.stat.favorite;  //收藏数量
+                                coin = _Jsonobj.data.stat.coin;  //投币数量
+                                share = _Jsonobj.data.stat.share;  //分享数量
+                                like = _Jsonobj.data.stat.like;  //获赞数量
+
+                                //时间戳转换
+                                Pubdate_Convert pubdate_Convert = new Pubdate_Convert();
+                                datetime = pubdate_Convert.Pubdate(pubdate);
+
+                                //主分区转换
+                                Tid_Judge tid_judge = new Tid_Judge();
+                                tidstr = tid_judge.Tid(Convert.ToInt32(tid));
+
+                                //版权信息判断
+                                Copyright_Judge copyright_judge = new Copyright_Judge();
+                                copyrightstr = copyright_judge.Copyright(Convert.ToInt32(copyright));
+
+                                //消息发送
+                                botClient.SendTextMessageAsync(
+                                e.Message.Chat,
+                                title + "[共" + videos + "P]" + "\n" + "bv号:" + bvid + "\n" + "av号:" + av + "\n" + "UP主:" + name 
+                                  + "\nUP主UID:" + mid + "\n" + "-----------------\n" +"分区:"+ tidstr + ":" + tname + "\n" + "点赞:" + like + "  投币:" 
+                                  + coin + "\n收藏:" + favorite + "  观看:" + view + "\n弹幕:" + danmaku + "  评论:" + reply + "\n分享:" + share +
+                                  "\n-----------------\n" + "简介:" + desc);
+
+                                //图片发送
+                                botClient.SendPhotoAsync(e.Message.Chat,pic,"视频封面",ParseMode.Html);
+                            }
+                            else
+                            {
+                                //发送错误详情
+                                botClient.SendTextMessageAsync(e.Message.Chat,"错误:\n" + "Code:" + _Jsonobj.code + "\n" + _Jsonobj.Message + "\n" + "错误码:\n400为请求错误\n404为找不到稿件\n62002为稿件不可见");
+                            }
+                        }
+                        else if (Msg.Substring(0, 2) == "AV")
+                        {
+                            //HttpGet_Json
+                            BiliBili_HttpGet_AV _HttpGet = new BiliBili_HttpGet_AV();
+                            Json = _HttpGet.HttpGet(aid = Msg.Substring(2, Msg.Length - 2));
+                            var _Jsonobj = JsonConvert.DeserializeObject<dynamic>(Json);
+                            if (_Jsonobj.code == 0)
+                            {
+                                //Json -> 变量
+                                //data.
+                                pic = _Jsonobj.data.pic;
+                                bvid = _Jsonobj.data.bvid;  //bv号
+                                av = "av" + _Jsonobj.data.aid; //av号
+                                title = _Jsonobj.data.title;  //标题
+                                videos = _Jsonobj.data.videos;  //分P数量
+                                tid = _Jsonobj.data.tid;  //主分区
+                                tname = _Jsonobj.data.tname;  //子分区
+                                copyright = _Jsonobj.data.copyright;  //版权信息
+                                pubdate = _Jsonobj.data.pubdate;  //投稿时间(时间戳
+                                desc = _Jsonobj.data.desc;  //简介
+                                duration = _Jsonobj.data.duration;  //视频持续时长(所有分P
+                                //data.owner.
+                                mid = _Jsonobj.data.owner.mid;  //up主UID
+                                name = _Jsonobj.data.owner.name;  //up主昵称
+                                face = _Jsonobj.data.owner.face;  //up主头像地址
+                                //data.stat.
+                                view = _Jsonobj.data.stat.view;  //观看数量
+                                danmaku = _Jsonobj.data.stat.danmaku;  //弹幕数量
+                                reply = _Jsonobj.data.stat.reply;  //评论数量
+                                favorite = _Jsonobj.data.stat.favorite;  //收藏数量
+                                coin = _Jsonobj.data.stat.coin;  //投币数量
+                                share = _Jsonobj.data.stat.share;  //分享数量
+                                like = _Jsonobj.data.stat.like;  //获赞数量
+
+                                //时间戳转换
+                                Pubdate_Convert pubdate_Convert = new Pubdate_Convert();
+                                datetime = pubdate_Convert.Pubdate(pubdate);
+
+                                //主分区转换
+                                Tid_Judge tid_judge = new Tid_Judge();
+                                tidstr = tid_judge.Tid(Convert.ToInt32(tid));
+
+                                //版权信息判断
+                                Copyright_Judge copyright_judge = new Copyright_Judge();
+                                copyrightstr = copyright_judge.Copyright(Convert.ToInt32(copyright));
+
+                                //消息发送
+                                botClient.SendTextMessageAsync(
+                                e.Message.Chat,
+                                title + "[共" + videos + "P]" + "\n" + "bv号:" + bvid + "\n" + "av号:" + av + "\n" + "UP主:" + name
+                                  + "\nUP主UID:" + mid + "\n" + "-----------------\n" + "分区:" + tidstr + ":" + tname + "\n" + "点赞:" + like + "  投币:"
+                                  + coin + "\n收藏:" + favorite + "  观看:" + view + "\n弹幕:" + danmaku + "  评论:" + reply + "\n分享:" + share +
+                                  "\n-----------------\n" + "简介:" + desc);
+
+                                //图片发送
+                                botClient.SendPhotoAsync(e.Message.Chat, pic, "视频封面", ParseMode.Html);
+                            }
+                            else
+                            {
+                                //发送错误详情
+                                botClient.SendTextMessageAsync(e.Message.Chat, "错误:\n" + "Code:" + _Jsonobj.code + "\n" + _Jsonobj.Message + "\n" + "错误码:\n400为请求错误\n404为找不到稿件\n62002为稿件不可见");
+                            }
+                        }
+                        else if (Msg.Substring(0, 2) == "BV")
+                        {
+                            //HttpGet_Json
+                            BiliBili_HttpGet_BV _HttpGet = new BiliBili_HttpGet_BV();
+                            Json = _HttpGet.HttpGet(aid = Msg.Substring(2, Msg.Length - 2));
+                            var _Jsonobj = JsonConvert.DeserializeObject<dynamic>(Json);
+                            if (_Jsonobj.code == 0)
+                            {
+                                //Json -> 变量
+                                //data.
+                                pic = _Jsonobj.data.pic;
+                                bvid = _Jsonobj.data.bvid;  //bv号
+                                av = "av" + _Jsonobj.data.aid; //av号
+                                title = _Jsonobj.data.title;  //标题
+                                videos = _Jsonobj.data.videos;  //分P数量
+                                tid = _Jsonobj.data.tid;  //主分区
+                                tname = _Jsonobj.data.tname;  //子分区
+                                copyright = _Jsonobj.data.copyright;  //版权信息
+                                pubdate = _Jsonobj.data.pubdate;  //投稿时间(时间戳
+                                desc = _Jsonobj.data.desc;  //简介
+                                duration = _Jsonobj.data.duration;  //视频持续时长(所有分P
+                                //data.owner.
+                                mid = _Jsonobj.data.owner.mid;  //up主UID
+                                name = _Jsonobj.data.owner.name;  //up主昵称
+                                face = _Jsonobj.data.owner.face;  //up主头像地址
+                                //data.stat.
+                                view = _Jsonobj.data.stat.view;  //观看数量
+                                danmaku = _Jsonobj.data.stat.danmaku;  //弹幕数量
+                                reply = _Jsonobj.data.stat.reply;  //评论数量
+                                favorite = _Jsonobj.data.stat.favorite;  //收藏数量
+                                coin = _Jsonobj.data.stat.coin;  //投币数量
+                                share = _Jsonobj.data.stat.share;  //分享数量
+                                like = _Jsonobj.data.stat.like;  //获赞数量
+
+                                //时间戳转换
+                                Pubdate_Convert pubdate_Convert = new Pubdate_Convert();
+                                datetime = pubdate_Convert.Pubdate(pubdate);
+
+                                //主分区转换
+                                Tid_Judge tid_judge = new Tid_Judge();
+                                tidstr = tid_judge.Tid(Convert.ToInt32(tid));
+
+                                //版权信息判断
+                                Copyright_Judge copyright_judge = new Copyright_Judge();
+                                copyrightstr = copyright_judge.Copyright(Convert.ToInt32(copyright));
+
+                                //消息发送
+                                botClient.SendTextMessageAsync(
+                                e.Message.Chat,
+                                title + "[共" + videos + "P]" + "\n" + "bv号:" + bvid + "\n" + "av号:" + av + "\n" + "UP主:" + name
+                                  + "\nUP主UID:" + mid + "\n" + "-----------------\n" + "分区:" + tidstr + ":" + tname + "\n" + "点赞:" + like + "  投币:"
+                                  + coin + "\n收藏:" + favorite + "  观看:" + view + "\n弹幕:" + danmaku + "  评论:" + reply + "\n分享:" + share +
+                                  "\n-----------------\n" + "简介:" + desc);
+
+                                //图片发送
+                                botClient.SendPhotoAsync(e.Message.Chat, pic, "视频封面", ParseMode.Html);
+                            }
+                            else
+                            {
+                                //发送错误详情
+                                botClient.SendTextMessageAsync(e.Message.Chat, "错误:\n" + "Code:" + _Jsonobj.code + "\n" + _Jsonobj.Message + "\n" + "错误码:\n400为请求错误\n404为找不到稿件\n62002为稿件不可见");
+                            }
+                        }
+                        else if (Msg.Substring(0, 2) == "bv")
+                        {
+                            //HttpGet_Json
+                            BiliBili_HttpGet_BV _HttpGet = new BiliBili_HttpGet_BV();
+                            Json = _HttpGet.HttpGet(aid = Msg.Substring(2, Msg.Length - 2));
+                            var _Jsonobj = JsonConvert.DeserializeObject<dynamic>(Json);
+                            if (_Jsonobj.code == 0)
+                            {
+                                //Json -> 变量
+                                //data.
+                                pic = _Jsonobj.data.pic;
+                                bvid = _Jsonobj.data.bvid;  //bv号
+                                av = "av" + _Jsonobj.data.aid; //av号
+                                title = _Jsonobj.data.title;  //标题
+                                videos = _Jsonobj.data.videos;  //分P数量
+                                tid = _Jsonobj.data.tid;  //主分区
+                                tname = _Jsonobj.data.tname;  //子分区
+                                copyright = _Jsonobj.data.copyright;  //版权信息
+                                pubdate = _Jsonobj.data.pubdate;  //投稿时间(时间戳
+                                desc = _Jsonobj.data.desc;  //简介
+                                duration = _Jsonobj.data.duration;  //视频持续时长(所有分P
+                                //data.owner.
+                                mid = _Jsonobj.data.owner.mid;  //up主UID
+                                name = _Jsonobj.data.owner.name;  //up主昵称
+                                face = _Jsonobj.data.owner.face;  //up主头像地址
+                                //data.stat.
+                                view = _Jsonobj.data.stat.view;  //观看数量
+                                danmaku = _Jsonobj.data.stat.danmaku;  //弹幕数量
+                                reply = _Jsonobj.data.stat.reply;  //评论数量
+                                favorite = _Jsonobj.data.stat.favorite;  //收藏数量
+                                coin = _Jsonobj.data.stat.coin;  //投币数量
+                                share = _Jsonobj.data.stat.share;  //分享数量
+                                like = _Jsonobj.data.stat.like;  //获赞数量
+
+                                //时间戳转换
+                                Pubdate_Convert pubdate_Convert = new Pubdate_Convert();
+                                datetime = pubdate_Convert.Pubdate(pubdate);
+
+                                //主分区转换
+                                Tid_Judge tid_judge = new Tid_Judge();
+                                tidstr = tid_judge.Tid(Convert.ToInt32(tid));
+
+                                //版权信息判断
+                                Copyright_Judge copyright_judge = new Copyright_Judge();
+                                copyrightstr = copyright_judge.Copyright(Convert.ToInt32(copyright));
+
+                                //消息发送
+                                botClient.SendTextMessageAsync(
+                                e.Message.Chat,
+                                title + "[共" + videos + "P]" + "\n" + "bv号:" + bvid + "\n" + "av号:" + av + "\n" + "UP主:" + name
+                                  + "\nUP主UID:" + mid + "\n" + "-----------------\n" + "分区:" + tidstr + ":" + tname + "\n" + "点赞:" + like + "  投币:"
+                                  + coin + "\n收藏:" + favorite + "  观看:" + view + "\n弹幕:" + danmaku + "  评论:" + reply + "\n分享:" + share +
+                                  "\n-----------------\n" + "简介:" + desc);
+
+                                //图片发送
+                                botClient.SendPhotoAsync(e.Message.Chat, pic, "视频封面", ParseMode.Html);
+                            }
+                            else
+                            {
+                                //发送错误详情
+                                botClient.SendTextMessageAsync(e.Message.Chat, "错误:\n" + "Code:" + _Jsonobj.code + "\n" + _Jsonobj.Message + "\n" + "错误码:\n400为请求错误\n404为找不到稿件\n62002为稿件不可见");
+                            }
+                        }
+                    }
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("\n------------------------\n" + ex.ToString() + "\n------------------------\n");
             }
         }
-
-
     }
 }
