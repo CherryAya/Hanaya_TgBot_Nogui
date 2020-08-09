@@ -3,21 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Telegram.Bot;
-//using Native.Tool.IniConfig;
-using Newtonsoft.Json;
 using System.Net;
 using System.IO;
-using Native.Tool.IniConfig.Linq;
+
+//Json工具
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
+//ini工具
+//using Native.Tool.IniConfig;
+//using Native.Tool.IniConfig.Linq;
+
+//Telegram.Bot SDK
+using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
+
+//Socks5 Proxy
+using MihaZupan;
 
 namespace Hanaya_TgBot_Nogui
 {
     public class Program
     {
+        public static ITelegramBotClient botClient;
         static async Task Main(string[] args)
         {
             try
@@ -26,9 +36,10 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("================");
                 Console.WriteLine("欢迎使用Hanaya_TgBot的Nogui版本");
                 Console.WriteLine("获取更新或支持请前往Github");
-                Console.WriteLine("如果是国内用户，请确保代理有被启用并有效");
+                Console.WriteLine("如果是国内用户 请确保代理有被启用并有效");
+                Console.WriteLine("需要使用Http/Socks5代理请去填写\\Proxy.json 不支持使用MTProto");
+                Console.WriteLine("如果代理文件未生成 请执行一遍程序 会自动生成");
                 Console.WriteLine("请保证登录阶段网络延迟在可接受范围内");
-                Console.WriteLine("否则程序有闪退可能.");
                 Console.WriteLine("GitHub:https://github.com/Tgbotdev/Hanaya_TgBot_Nogui");
                 Console.WriteLine("================");
 
@@ -68,20 +79,20 @@ namespace Hanaya_TgBot_Nogui
                 Console.Write("Token:");
                 string token = Console.ReadLine();
 
-                //Token储存 临时文件使用txt 带加密 
-                string tokenPath = Directory.GetCurrentDirectory() + "\\tokenSave.txt";
-                tokenProtect.Encryption encryption = new tokenProtect.Encryption();
-                string EncryptionText = encryption.Encrypt(token);
-                if (EncryptionText == "Error")
-                {
-                    Console.WriteLine("[错误]token加密未成功,取消本地写入token并退出,请重启程序");
-                    Environment.Exit(0);
-                }
-                else
-                {
-                    Console.WriteLine("[信息]token加密成功,已写入本地");
-                    System.IO.File.WriteAllText(tokenPath, EncryptionText);
-                }
+                ////Token储存 临时文件使用txt 带加密 取消使用
+                //string tokenPath = Directory.GetCurrentDirectory() + "\\tokenSave.txt";
+                //tokenProtect.Encryption encryption = new tokenProtect.Encryption();
+                //string EncryptionText = encryption.Encrypt(token);
+                //if (EncryptionText == "Error")
+                //{
+                //    Console.WriteLine("[错误]token加密未成功,取消本地写入token并退出,请重启程序");
+                //    Environment.Exit(0);
+                //}
+                //else
+                //{
+                //    Console.WriteLine("[信息]token加密成功,已写入本地");
+                //    System.IO.File.WriteAllText(tokenPath, EncryptionText);
+                //}
 
 
                 //该方法弃用
@@ -95,9 +106,56 @@ namespace Hanaya_TgBot_Nogui
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11;
 
-                //建立Bot客户端
-                Console.WriteLine("[信息]搭建Bot客户端 导入token");
-                var botClient = new TelegramBotClient(token);
+                //检测代理配置文件 并建立Bot客户端
+                string ProxyConfig = Directory.GetCurrentDirectory() + "\\Proxy.json";
+                if (System.IO.File.Exists(ProxyConfig) == false)
+                {
+                    Console.WriteLine("[代理]配置文件不存在 创建默认配置文件");
+                    System.IO.File.WriteAllText(ProxyConfig, "{\"Mode\":\"None\",\"Socks5\":{\"ServerAddress\":\"\",\"ServerPort\":\"\",\"Username\":\"\",\"Password\":\"\"},\"Http\":{\"ServerAddress\":\"\",\"ServerPort\":\"\",\"Username\":\"\",\"Password\":\"\"}}");
+                }
+                var ProxyJson = System.IO.File.ReadAllText(ProxyConfig);
+                var Proxy = JsonConvert.DeserializeObject<dynamic>(ProxyJson);
+                string ProxyMode = Proxy.Mode;
+                if (ProxyMode == "None")
+                {
+                    Console.WriteLine("[代理]代理设置为None(不使用代理)");
+                    Console.WriteLine("[信息]搭建Bot客户端 导入token");
+                    botClient = new TelegramBotClient(token);
+                }
+                else if (ProxyMode == "Http")
+                {
+                    string ServerAddress, Username, Password;
+                    int ServerPort;
+                    ServerAddress = Proxy.Http.ServerAddress;
+                    ServerPort = Proxy.Http.ServerPort;
+                    Username = Proxy.Http.Username;
+                    Password = Proxy.Http.Password;
+                    var proxy = new WebProxy(ServerAddress, ServerPort)
+                    {
+                        Credentials = new NetworkCredential(Username, Password)
+                    };
+                    Console.WriteLine("[代理]使用代理 模式'Http-Proxy'");
+                    Console.WriteLine($"[代理]准备连接至{ServerAddress}:{ServerPort}");
+                    Console.WriteLine($"[代理]用户名{Username} 密码{Password}");
+                    Console.WriteLine("[信息]搭建Bot客户端 导入token");
+                    botClient = new TelegramBotClient(token,proxy);
+                }
+                else if (ProxyMode == "Socks5")
+                {
+                    string ServerAddress, Username, Password;
+                    int ServerPort;
+                    ServerAddress = Proxy.Socks5.ServerAddress;
+                    ServerPort = Proxy.Socks5.ServerPort;
+                    Username = Proxy.Socks5.Username;
+                    Password = Proxy.Socks5.Password;
+                    var proxy = new HttpToSocks5Proxy(ServerAddress, ServerPort, Username, Password);
+                    proxy.ResolveHostnamesLocally = true;
+                    Console.WriteLine("[代理]使用代理 模式'Socks5-Proxy'");
+                    Console.WriteLine($"[代理]准备连接至{ServerAddress}:{ServerPort}");
+                    Console.WriteLine($"[代理]用户名{Username} 密码{Password}");
+                    Console.WriteLine("[信息]搭建Bot客户端 导入token");
+                    botClient = new TelegramBotClient(token,proxy);
+                }
 
                 //获取Bot资料
                 Console.WriteLine("[信息]开始获取Bot资料\n");
@@ -158,6 +216,8 @@ namespace Hanaya_TgBot_Nogui
                 //    Console.WriteLine("[信息]配置文件丢失,重新创建文件,默认功能为'0'");
                 //}
                 //iniConfig.Load();
+
+                //选择功能
                 Console.WriteLine("[信息]请选择启用的功能");
                 Console.WriteLine("[信息]1 复读机");
                 Console.WriteLine("[信息]2 BiliBili信息获取");
@@ -212,10 +272,7 @@ namespace Hanaya_TgBot_Nogui
             }
         }
 
-
        //复读机
-       //不直接提供token
-       //static ITelegramBotClient botClient;
        //异步直接tm飞向finally***
        //采用同步，否则直接finally
        //这边骂一句example,nmd纯属误导人
@@ -223,19 +280,19 @@ namespace Hanaya_TgBot_Nogui
         {
             try
             {
-                //建立Bot客户端
+                //建立Bot客户端 废弃 使用全局Bot客户端
                 //写到这才想起json没储存token...
                 //var botInfo = File.ReadAllText(Directory.GetCurrentDirectory() + "\\botInfo.json");
                 //var Json = JsonConvert.DeserializeObject<dynamic>(botInfo);
-                string token = System.IO.File.ReadAllText(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
-                tokenProtect.Decryption decryption = new tokenProtect.Decryption();
-                string DecryptionText = decryption.Decrypt(token); //解密
-                if (DecryptionText == "Error")
-                {
-                    Console.WriteLine("[错误]token解密未成功,将导致空指针异常,本次信息可能返回控制台但不被处理");
-                    DecryptionText = null;
-                }
-                TelegramBotClient botClient = new TelegramBotClient(DecryptionText);
+                //string token = System.IO.File.ReadAllText(Directory.GetCurrentDirectory()+"\\tokenSave.txt");
+                //tokenProtect.Decryption decryption = new tokenProtect.Decryption();
+                //string DecryptionText = decryption.Decrypt(token); //解密
+                //if (DecryptionText == "Error")
+                //{
+                //    Console.WriteLine("[错误]token解密未成功,将导致空指针异常,本次信息可能返回控制台但不被处理");
+                //    DecryptionText = null;
+                //}
+                //botClient = new TelegramBotClient(DecryptionText);
 
                 //判断消息不为空
                 if (e.Message.Text != null)
@@ -266,16 +323,16 @@ namespace Hanaya_TgBot_Nogui
                 string mid, name, face;//data.owner.
                 string view, danmaku, reply, favorite, coin, share, like;//data.stat.
 
-                //建立Bot客户端
-                string token = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + "\\tokenSave.txt");
-                tokenProtect.Decryption decryption = new tokenProtect.Decryption();
-                string DecryptionText = decryption.Decrypt(token); //解密
-                if (DecryptionText == "Error")
-                {
-                    Console.WriteLine("[错误]token解密未成功,将导致空指针异常,本次信息可能返回控制台但不被处理");
-                    DecryptionText = null;
-                }
-                TelegramBotClient botClient = new TelegramBotClient(DecryptionText);
+                ////建立Bot客户端 废弃 使用全局Bot客户端
+                //string token = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + "\\tokenSave.txt");
+                //tokenProtect.Decryption decryption = new tokenProtect.Decryption();
+                //string DecryptionText = decryption.Decrypt(token); //解密
+                //if (DecryptionText == "Error")
+                //{
+                //    Console.WriteLine("[错误]token解密未成功,将导致空指针异常,本次信息可能返回控制台但不被处理");
+                //    DecryptionText = null;
+                //}
+                //TelegramBotClient botClient = new TelegramBotClient(DecryptionText);
 
                 //判断消息不为空
                 if (e.Message.Text != null)
@@ -537,6 +594,7 @@ namespace Hanaya_TgBot_Nogui
                                 //发送错误详情
                                 botClient.SendTextMessageAsync(e.Message.Chat, "错误:\n" + "Code:" + _Jsonobj.code + "\n" + _Jsonobj.Message + "\n" + "错误码:\n400为请求错误\n404为找不到稿件\n62002为稿件不可见");
                             }
+                            
                         }
                     }
                 }
