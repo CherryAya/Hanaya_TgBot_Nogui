@@ -6,12 +6,6 @@
 ##### 编写语言为C# 基于.Net Framework 4.5 引用Telegram.Bot为SDK:[Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot)
 ###### Language:C# Based on:.Net Framework 4.5.2 Using:Telegram.Bot.C#SDK:[Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot)
 ***
-## Version : Alpha 1.1
-#### Time:2020.08.09
-1. Update:
- - 1.添加代理设置(dir\Proxy.json) 支持Http-Proxy和Socks5-Proxy 不支持MTProto-Proxy
- - 2.取消了token写入 使用全局BotClinet
-***
 ## Version : Alpha 1.0
 #### Time:2020.08.09
 1. 功能：
@@ -27,4 +21,3 @@
  - 直接提交issue
  - 或邮箱发送反馈 kagurayayoi@88.com
 ***
-###### Hope we can meet in a more open parallel world.
