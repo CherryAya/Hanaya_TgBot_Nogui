@@ -219,8 +219,9 @@ namespace Hanaya_TgBot_Nogui
 
                 //选择功能
                 Console.WriteLine("[信息]请选择启用的功能");
-                Console.WriteLine("[信息]1 复读机");
-                Console.WriteLine("[信息]2 BiliBili信息获取");
+                Console.WriteLine("[功能]1 复读机 (Respeak)");
+                Console.WriteLine("[功能]2 BiliBili信息获取 (InfoGet_fromBili)");
+                Console.WriteLine("[功能]3 一言 (Hitokoto)");
                 Console.Write(">");
                 string func = Console.ReadLine();
                 if (func == "1")
@@ -244,6 +245,17 @@ namespace Hanaya_TgBot_Nogui
                     botClient.OnMessage += BotClient_InfoGet_bili;
                     botClient.StartReceiving();
                     Console.WriteLine("[处理]: 对消息来源一律处理 -> BiliBili_InfoGet. (不匹配消息会被忽略)");
+                    Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
+                    Console.ReadKey();
+                    botClient.StopReceiving();
+                }else if (func == "3")
+                {
+                    //一言
+                    Console.WriteLine("[信息]载入3号功能:一言");
+                    //接受消息开始
+                    botClient.OnMessage += BotClient_Hitokoto;
+                    botClient.StartReceiving();
+                    Console.WriteLine("[处理]: 对消息来源一律处理 -> Hitokoto. (不匹配消息会被忽略)");
                     Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
                     Console.ReadKey();
                     botClient.StopReceiving();
@@ -594,7 +606,77 @@ namespace Hanaya_TgBot_Nogui
                                 //发送错误详情
                                 botClient.SendTextMessageAsync(e.Message.Chat, "错误:\n" + "Code:" + _Jsonobj.code + "\n" + _Jsonobj.Message + "\n" + "错误码:\n400为请求错误\n404为找不到稿件\n62002为稿件不可见");
                             }
-                            
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("\n------------------------\n" + ex.ToString() + "\n------------------------\n");
+            }
+        }
+
+        static void BotClient_Hitokoto(object sender,MessageEventArgs e)
+        {
+            try
+            {
+                //判断不为空
+                if (e.Message.Text != null)
+                {
+                    //控制台输出
+                    Console.WriteLine($"[信息]: 来自{e.Message.Chat.Id},消息:{e.Message.Text}.");
+                    //判断关键词
+                    string Msg = e.Message.Text;
+                    if (Msg.Length >= 2)
+                    {
+                        if (Msg.Length ==2 && Msg.Substring(0, 2) == "一言")
+                        {
+                            //HttpGet
+                            Hitokoto_HttpGet _HttpGet = new Hitokoto_HttpGet();
+                            string Rtn = _HttpGet.HttpGet();
+                            var Json = JsonConvert.DeserializeObject<dynamic>(Rtn);
+                            string Hitokoto = Json.msg;
+                            botClient.SendTextMessageAsync(e.Message.Chat, Hitokoto);
+                        }
+                        else if (Msg.Length == 2 && Msg.Substring(0, 2) == "动漫")
+                        {
+                            Anime_HttpGet _HttpGet = new Anime_HttpGet();
+                            string Rtn = _HttpGet.HttpGet();
+                            var Json = JsonConvert.DeserializeObject<dynamic>(Rtn);
+                            string Anime = Json.msg;
+                            botClient.SendTextMessageAsync(e.Message.Chat, Anime);
+                        }
+                        else if (Msg.Length == 2 && Msg.Substring(0, 2) == "表情")
+                        {
+                            Emoji_HttpGet _HttpGet = new Emoji_HttpGet();
+                            string Rtn = _HttpGet.HttpGet();
+                            var Json = JsonConvert.DeserializeObject<dynamic>(Rtn);
+                            string Emoji = Json.msg;
+                            botClient.SendTextMessageAsync(e.Message.Chat, Emoji);
+                        }
+                        else if (Msg.Length == 2 && Msg.Substring(0, 2) == "帮助")
+                        {
+                            string Help = "一言-帮助:\n" +
+                                "发送下列命令可获得返回\n" +
+                                "一言/动漫/表情/为什么/小提示\n" +
+                                "来源接口:tosks.com";
+                            botClient.SendTextMessageAsync(e.Message.Chat, Help);
+                        }
+                        else if (Msg.Length == 3 && Msg.Substring(0, 3) == "为什么")
+                        {
+                            Whys_HttpGet _HttpGet = new Whys_HttpGet();
+                            string Rtn = _HttpGet.HttpGet();
+                            var Json = JsonConvert.DeserializeObject<dynamic>(Rtn);
+                            string Whys = Json.msg;
+                            botClient.SendTextMessageAsync(e.Message.Chat, Whys);
+                        }
+                        else if (Msg.Length == 3 && Msg.Substring(0, 3) == "小提示")
+                        {
+                            Tips_HttpGet _HttpGet = new Tips_HttpGet();
+                            string Rtn = _HttpGet.HttpGet();
+                            var Json = JsonConvert.DeserializeObject<dynamic>(Rtn);
+                            string Tips = Json.msg;
+                            botClient.SendTextMessageAsync(e.Message.Chat, Tips);
                         }
                     }
                 }

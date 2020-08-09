@@ -53,30 +53,37 @@
     <Reference Include="MihaZupan.HttpToSocks5Proxy, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\HttpToSocks5Proxy.1.4.0\lib\net45\MihaZupan.HttpToSocks5Proxy.dll</HintPath>
     </Reference>
-    <Reference Include="Native.Tool">
-      <HintPath>lib\Native.Tool.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Native.Tool, Version=3.3.2.501, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\Hanaya_TgBot\lib\Native.Tool.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Telegram.Bot">
-      <HintPath>lib\Telegram.Bot.dll</HintPath>
+    <Reference Include="Telegram.Bot, Version=15.7.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Telegram.Bot.15.7.1\lib\net45\Telegram.Bot.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hitokoto\Anime_HttpGet.cs" />
+    <Compile Include="Hitokoto\Emoji_HttpGet.cs" />
+    <Compile Include="Hitokoto\Hitokoto_HttpGet.cs" />
+    <Compile Include="Hitokoto\Tips_HttpGet.cs" />
+    <Compile Include="Hitokoto\Whys_HttpGet.cs" />
     <Compile Include="InfoGet.fromBiliBili\BiliBili_HttpGet_AV.cs" />
     <Compile Include="InfoGet.fromBiliBili\BiliBili_HttpGet_BV.cs" />
     <Compile Include="InfoGet.fromBiliBili\Copyright_Judge.cs" />
-    <Compile Include="Disuse\[disuse]botLogin.cs" />
+    <Compile Include="Disuse\[Disuse]botLogin.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="InfoGet.fromBiliBili\Pubdate_Convert.cs" />
@@ -98,5 +105,6 @@
   <ItemGroup>
     <Content Include="MspCalculator.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
