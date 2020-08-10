@@ -47,7 +47,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>MspCalculator.ico</ApplicationIcon>
+    <ApplicationIcon>CoolTelegram.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MihaZupan.HttpToSocks5Proxy, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -75,11 +75,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hitokoto\Anime_HttpGet.cs" />
-    <Compile Include="Hitokoto\Emoji_HttpGet.cs" />
-    <Compile Include="Hitokoto\Hitokoto_HttpGet.cs" />
-    <Compile Include="Hitokoto\Tips_HttpGet.cs" />
-    <Compile Include="Hitokoto\Whys_HttpGet.cs" />
+    <Compile Include="ACGPicture_Api\Picture_HttpGet.cs" />
+    <Compile Include="Hitokoto_Api\Anime_HttpGet.cs" />
+    <Compile Include="Hitokoto_Api\Emoji_HttpGet.cs" />
+    <Compile Include="Hitokoto_Api\Hitokoto_HttpGet.cs" />
+    <Compile Include="Hitokoto_Api\Tips_HttpGet.cs" />
+    <Compile Include="Hitokoto_Api\Whys_HttpGet.cs" />
     <Compile Include="InfoGet.fromBiliBili\BiliBili_HttpGet_AV.cs" />
     <Compile Include="InfoGet.fromBiliBili\BiliBili_HttpGet_BV.cs" />
     <Compile Include="InfoGet.fromBiliBili\Copyright_Judge.cs" />
@@ -103,6 +104,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CoolTelegram.ico" />
     <Content Include="MspCalculator.ico" />
   </ItemGroup>
   <ItemGroup />

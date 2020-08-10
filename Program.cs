@@ -27,6 +27,7 @@ namespace Hanaya_TgBot_Nogui
 {
     public class Program
     {
+        //全局Bot客户端
         public static ITelegramBotClient botClient;
         static async Task Main(string[] args)
         {
@@ -222,6 +223,7 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("[功能]1 复读机 (Respeak)");
                 Console.WriteLine("[功能]2 BiliBili信息获取 (InfoGet_fromBili)");
                 Console.WriteLine("[功能]3 一言 (Hitokoto)");
+                Console.WriteLine("[功能]4 随机二次元美图 (ACGPicture)");
                 Console.Write(">");
                 string func = Console.ReadLine();
                 if (func == "1")
@@ -248,7 +250,8 @@ namespace Hanaya_TgBot_Nogui
                     Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
                     Console.ReadKey();
                     botClient.StopReceiving();
-                }else if (func == "3")
+                }
+                else if (func == "3")
                 {
                     //一言
                     Console.WriteLine("[信息]载入3号功能:一言");
@@ -256,6 +259,18 @@ namespace Hanaya_TgBot_Nogui
                     botClient.OnMessage += BotClient_Hitokoto;
                     botClient.StartReceiving();
                     Console.WriteLine("[处理]: 对消息来源一律处理 -> Hitokoto. (不匹配消息会被忽略)");
+                    Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
+                    Console.ReadKey();
+                    botClient.StopReceiving();
+                }
+                else if (func == "4")
+                {
+                    //随机二次元图片
+                    Console.WriteLine("[信息]载入4号功能:随机二次元美图");
+                    //接受消息开始
+                    botClient.OnMessage += BotClinet_ACGPicture_API;
+                    botClient.StartReceiving();
+                    Console.WriteLine("[处理]: 对消息来源一律处理 -> ACGPicture. (不匹配消息会被忽略)");
                     Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
                     Console.ReadKey();
                     botClient.StopReceiving();
@@ -678,6 +693,34 @@ namespace Hanaya_TgBot_Nogui
                             string Tips = Json.msg;
                             botClient.SendTextMessageAsync(e.Message.Chat, Tips);
                         }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("\n------------------------\n" + ex.ToString() + "\n------------------------\n");
+            }
+        }
+
+        static void BotClinet_ACGPicture_API(object sender, MessageEventArgs e)
+        {
+            try
+            {
+                string Msg, Url;
+                //判断
+                if (e.Message.Text != null)
+                {
+                    //控制台输出
+                    Console.WriteLine($"[信息]: 来自{e.Message.Chat.Id},消息:{e.Message.Text}.");
+                    //存储
+                    Msg = e.Message.Text;
+                    //判断
+                    if (Msg.Length == 2 && Msg.Substring(0,2)=="美图")
+                    {
+                        //获取并发送
+                        Picture_HttpGet _HttpGet = new Picture_HttpGet();
+                        Url = _HttpGet.HttpGet();
+                        botClient.SendPhotoAsync(e.Message.Chat, Url, Url, ParseMode.Html);
                     }
                 }
             }
