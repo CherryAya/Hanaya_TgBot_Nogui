@@ -224,6 +224,8 @@ namespace Hanaya_TgBot_Nogui
                 Console.WriteLine("[功能]2 BiliBili信息获取 (InfoGet_fromBili)");
                 Console.WriteLine("[功能]3 一言 (Hitokoto)");
                 Console.WriteLine("[功能]4 随机二次元美图 (ACGPicture)");
+                Console.WriteLine("[功能]5 Pixivic查询 (Pixivic_Api)");
+
                 Console.Write(">");
                 string func = Console.ReadLine();
                 if (func == "1")
@@ -271,6 +273,18 @@ namespace Hanaya_TgBot_Nogui
                     botClient.OnMessage += BotClinet_ACGPicture_API;
                     botClient.StartReceiving();
                     Console.WriteLine("[处理]: 对消息来源一律处理 -> ACGPicture. (不匹配消息会被忽略)");
+                    Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
+                    Console.ReadKey();
+                    botClient.StopReceiving();
+                }
+                else if (func == "5")
+                {
+                    //Pixivic
+                    Console.WriteLine("[信息]载入5号功能:Pixivic查询");
+                    //接受消息开始
+                    botClient.OnMessage += BotClient_Pixivic;
+                    botClient.StartReceiving();
+                    Console.WriteLine("[处理]: 对消息来源一律处理 -> Pixivic_Api. (不匹配消息会被忽略)");
                     Console.WriteLine("[提示]消息处理开始,按任意键终止\n");
                     Console.ReadKey();
                     botClient.StopReceiving();
@@ -721,6 +735,53 @@ namespace Hanaya_TgBot_Nogui
                         Picture_HttpGet _HttpGet = new Picture_HttpGet();
                         Url = _HttpGet.HttpGet();
                         botClient.SendPhotoAsync(e.Message.Chat, Url, Url, ParseMode.Html);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("\n------------------------\n" + ex.ToString() + "\n------------------------\n");
+            }
+        }
+
+        static void BotClient_Pixivic(object sender , MessageEventArgs e)
+        {
+            try
+            {
+                string Msg;
+                if (e.Message.Text != null)
+                {
+                    Console.WriteLine($"[信息]: 来自{e.Message.Chat.Id},消息:{e.Message.Text}.");
+                    Msg = e.Message.Text;
+                    if (Msg.Length > 2 && Msg.Substring(0, 2) == "搜图")
+                    {
+                        if (Msg.Length > 5 && Msg.Substring(3, 2) == "列表")
+                        {
+                            if (Msg.Length > 9)
+                            {
+                                string piclist, keyword = Msg.Substring(6, Msg.Length - 9), pageSize = Msg.Substring(Msg.Length - 2, 2);
+                                if (Convert.ToInt32(pageSize) <= 25)
+                                {
+                                    illustrations_api illustrations = new illustrations_api();
+                                    piclist = illustrations.ListResult(keyword, pageSize);
+                                    botClient.SendTextMessageAsync(e.Message.Chat, piclist);
+                                }
+                                else
+                                {
+                                    botClient.SendTextMessageAsync(e.Message.Chat,"[防刷屏]lsp,要这么多小心肾虚");
+                                }
+                            }
+                        }
+                        else if (Msg.Length > 5 && Msg.Substring(3, 2) == "单张")
+                        {
+                            if (Msg.Length > 6)
+                            {
+                                string picurl, keyword = Msg.Substring(6, Msg.Length - 6);
+                                illustrations_api illustrations = new illustrations_api();
+                                picurl = illustrations.FirstResult(keyword);
+                                botClient.SendPhotoAsync(e.Message.Chat, picurl, picurl, ParseMode.Html);
+                            }
+                        }
                     }
                 }
             }

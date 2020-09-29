@@ -1,0 +1,10 @@
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\bin\Debug\Hanaya_TgBot_Nogui_Login.exe.config
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\bin\Debug\Hanaya_TgBot_Nogui_Login.exe
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\bin\Debug\Hanaya_TgBot_Nogui_Login.pdb
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\bin\Debug\Native.Tool.dll
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\bin\Debug\Newtonsoft.Json.dll
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\bin\Debug\Telegram.Bot.dll
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\obj\Debug\Hanaya_TgBot_Nogui_Login.csprojAssemblyReference.cache
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\obj\Debug\Hanaya_TgBot_Nogui_Login.csproj.CopyComplete
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\obj\Debug\Hanaya_TgBot_Nogui_Login.exe
+F:\Telegram.Bot.Develop\Hanaya_TgBot\Hanaya_TgBot_Nogui\obj\Debug\Hanaya_TgBot_Nogui_Login.pdb
